@@ -1,0 +1,61 @@
+group 'kazurayam.com'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+
+mainClassName = 'sample.Main'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+    testCompile('junit:junit:4.12') {
+        transitive = false
+    }
+}
+
+startScripts.applicationName = 'sample'
+
+eclipse {
+  //println 'eclipse.delegate.class = ' + delegate.class
+    project {
+      //println 'project.delegate.class = ' + delegate.class
+        name = 'SampleProject'
+    }
+}
+
+task helloWorld {
+  description = "こんにちは!します"
+  doLast {
+    println "Hello, world!"
+  }
+}
+
+
+
+import org.json.JSONObject
+
+buildscript {
+  repositories { mavenCentral() }
+  dependencies { classpath 'org.json:json:20090211' }
+}
+
+task weatherReport {
+  description = "今日の東京のお天気をお伝えします"
+  doLast {
+    URL url = new URL("http://weather.livedoor.com/forecast/webservice/json/v1?city=130010")
+    URLConnection connection = url.openConnection()
+    InputStream is = connection.getInputStream()
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is))
+    JSONObject json = new JSONObject(reader.readLine())
+    String cityName = json.getJSONObject('location').getString('city')
+    String weather = json.getJSONArray("forecasts").getJSONObject(0).getString("telop")
+    println "${cityName}の今日のお天気は${weather}です"
+  }
+}
